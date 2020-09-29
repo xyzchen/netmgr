@@ -115,7 +115,7 @@ def windows_macfitler(df, dnsServer):
 		if str(df['mac'][i]) == "" or str(df['mac'][i]) == "nan":
 			continue
 		#生成允许列表
-		pcdesc = "{}_{}_{}".format(df['owner'][i], df['room'][i], df['comment'][i])
+		pcdesc = "{}_{}_{}_{}".format(df['ip'][i], df['owner'][i], df['room'][i], df['comment'][i])
 		pcmac = df['mac'][i].replace('-', '').lower()
 		if df["owner"][i][0:2] != '保留':
 			result += "Dhcp Server {} v4 Add Filter Allow {} \"{}\"\r\n".format(dnsServer, pcmac, pcdesc)
@@ -133,7 +133,7 @@ def export_maclist(df):
 		if str(df['mac'][i]) == "" or str(df['mac'][i]) == "nan":
 			continue
 		#生成允许列表
-		pcdesc = "{}_{}_{}".format(df['owner'][i], df['room'][i], df['comment'][i])
+		pcdesc = "{}_{}_{}_{}".format(df['ip'][i], df['owner'][i], df['room'][i], df['comment'][i])
 		pcmac = df['mac'][i].replace('-', '').lower()
 		if df["owner"][i][0:2] != '保留':
 			result += "{}    # {}\r\n".format(pcmac, pcdesc)
@@ -151,9 +151,9 @@ if __name__ == '__main__':
 	#输出：输出方法和文件名
 	parser.add_argument('-a', '--action', default="print", help='''指定要执行的动作：
     print（输出读取的信息，默认）, 
-    bind（生成Linux dhcpd 的 ip-mac 绑定配置器文件）,
-    winbind（生成 Windows Server dhcp 的绑定命令文件）,
-    macfilter(生成 Windows Server dhcp 的筛选命令文件),
+    lbind（生成Linux dhcpd 的 ip-mac 绑定配置器文件）,
+    bind（生成 Windows Server dhcp 的绑定命令文件）,
+    filter(生成 Windows Server dhcp 的筛选命令文件),
     maclist（生成 Windows Server dhcp 的MAC过滤文件）,
     user（上网行为管理列表）''')
 	parser.add_argument('-d', '--dnsserver', default="10.99.2.103", help="指定 Windows 绑定的 DNS Server 的IP地址")
@@ -170,19 +170,19 @@ if __name__ == '__main__':
 		#执行动作并输出
 		if args.action == 'print':
 			print_macinfo(df)
-		elif args.action == 'bind':	#生成Linux绑定格式
+		elif args.action == 'lbind':	#生成Linux绑定格式
 			bindtxt = dhcpd_bind(df)
-			outfile = args.sheet + ".conf"
+			outfile = args.sheet + "_bind.conf"
 			with open(outfile, "wb") as f:
 				f.write(bindtxt.encode('utf-8'))
 			print("Successful! copy file {} to Linux dhcp server /etc/dhcp/bind/".format(outfile))
-		elif args.action == 'winbind':	#生成Windows绑定命令
+		elif args.action == 'bind':	#生成Windows绑定命令
 			bindtxt = windows_bind(df, args.dnsserver)
 			outfile = args.sheet + "_bind.txt"
 			with open(outfile, "wb") as f:
 				f.write(bindtxt.encode('gbk'))
 			print("Successful! Execute “netsh exec {}” on Windows DNS Server to bind.".format(outfile))
-		elif args.action == 'macfilter':	#生成Windows筛选命令
+		elif args.action == 'filter':	#生成Windows筛选命令
 			bindtxt = windows_macfitler(df, args.dnsserver)
 			outfile = args.sheet + "_filter.txt"
 			with open(outfile, "wb") as f:
@@ -190,11 +190,13 @@ if __name__ == '__main__':
 			print("Successful! Execute “netsh exec {}” on Windows DNS Server to bind.".format(outfile))
 		elif args.action == 'maclist':	#输出DHCP MacList
 			listtext = "MAC_ACTION = {ALLOW}\r\n#允许的Mac地址列表\r\n" + export_maclist(df)
-			with open("MACList.txt", "wb") as f:
+			outfile = args.sheet + "_MACList.txt"
+			with open(outfile, "wb") as f:
 				f.write(listtext.encode('gbk'))
 		elif args.action == 'user':	#输出上网行为管理列表
 			listtext = export_userlist(df)
-			with open("organizedFrame.csv", "wb") as f:
+			outfile = args.sheet + "organizedFrame.csv"
+			with open(outfile, "wb") as f:
 				f.write(listtext.encode('gbk'))
 		else:
 			print("\033[31m错误：未定义的动作！\033[0m")
