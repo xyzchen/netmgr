@@ -10,7 +10,7 @@ import re
 import json
 import pymysql
 import pandas as pd
-from jlib.ipmac import sort_macinfo, format_mac
+from jlib.ipmac import sort_macinfo, format_mac, ip_to_int
 
 #==========================================================
 # 辅助函数
@@ -27,7 +27,7 @@ from jlib.ipmac import sort_macinfo, format_mac
 #   macinfo["diskid"];	//硬盘序列号
 #   macinfo["pcname"];	//计算机名
 #   macinfo["owner"];	//使用者
-#	macinfo["username"];//用户名
+#   macinfo["username"];//用户名
 #   macinfo["room"];	//房间号
 #   macinfo["comment"];	//其它信息，交换机端口号
 #----------------------------------------------
@@ -115,7 +115,7 @@ def windows_macfitler(df, dnsServer):
 		if str(df['mac'][i]) == "" or str(df['mac'][i]) == "nan":
 			continue
 		#生成允许列表
-		pcdesc = "{}_{}_{}_{}".format(df['ip'][i], df['owner'][i], df['room'][i], df['comment'][i])
+		pcdesc = "{}_{}_{}_{}_{}".format(ip_to_int(df['ip'][i]), df['ip'][i], df['owner'][i], df['room'][i], df['comment'][i])
 		pcmac = df['mac'][i].replace('-', '').lower()
 		if df["owner"][i][0:2] != '保留':
 			result += "Dhcp Server {} v4 Add Filter Allow {} \"{}\"\r\n".format(dnsServer, pcmac, pcdesc)
