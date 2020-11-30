@@ -156,7 +156,7 @@ if __name__ == '__main__':
     filter(生成 Windows Server dhcp 的筛选命令文件),
     maclist（生成 Windows Server dhcp 的MAC过滤文件）,
     user（上网行为管理列表）''')
-	parser.add_argument('-d', '--dnsserver', default="10.99.2.103", help="指定 Windows 绑定的 DNS Server 的IP地址")
+	parser.add_argument('-d', '--dnsserver', default="10.99.2.104", help="指定 Windows 绑定的 DNS Server 的IP地址")
 	parser.add_argument('-o', '--out', default="dhcpbind.conf", help="输出绑定命令的文件名")
 	#输入，文件名和表名
 	parser.add_argument('filename', type=str, help="输入的Excel文件名")
@@ -166,7 +166,7 @@ if __name__ == '__main__':
 	#输入：数据来源类型，数据库或文件
 	#输入
 	try:
-		df = pd.read_excel(args.filename, args.sheet, dtype={'username':str, 'diskid':str})
+		df = pd.read_excel(args.filename, args.sheet, dtype={'username':str, 'diskid':str, 'room':str})
 		#执行动作并输出
 		if args.action == 'print':
 			print_macinfo(df)
